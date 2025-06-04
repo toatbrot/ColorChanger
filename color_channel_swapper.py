@@ -35,6 +35,10 @@ class ColorChannelSwapper:
         self.img_label = tk.Label(self.root)
         self.img_label.pack(pady=5)
 
+        # Add traces to channel1 and channel2
+        self.channel1.trace_add('write', self.update_swap_btn_state)
+        self.channel2.trace_add('write', self.update_swap_btn_state)
+
     def load_image(self):
         file_path = filedialog.askopenfilename(filetypes=[("Image Files", "*.png;*.jpg;*.jpeg;*.bmp;*.gif")])
         if file_path:
@@ -58,6 +62,8 @@ class ColorChannelSwapper:
         if c1 == c2:
             messagebox.showwarning("Warning", "Please select two different channels.")
             return
+        # Disable the swap button if identical channels are selected
+        self.swap_btn.config(state=tk.NORMAL if c1 != c2 else tk.DISABLED)
         channel_indices = {'R': 0, 'G': 1, 'B': 2}
         arr = self.image.copy()
         r, g, b = arr.split()
@@ -68,6 +74,12 @@ class ColorChannelSwapper:
         self.image = swapped
         self.display_image(self.image)
         self.save_btn.config(state=tk.NORMAL)
+
+    # Add a trace to the channel selection to disable the swap button if identical
+    def update_swap_btn_state(self, *args):
+        c1 = self.channel1.get()
+        c2 = self.channel2.get()
+        self.swap_btn.config(state=tk.NORMAL if c1 != c2 and self.image else tk.DISABLED)
 
     def save_image(self):
         if not self.image:
