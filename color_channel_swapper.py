@@ -8,6 +8,7 @@ class ColorChannelSwapper:
         self.root = root
         self.root.title("Color Channel Swapper")
         self.image = None
+        self.original_image = None  # Store the original image
         self.imgtk = None
         self.file_path = None
 
@@ -29,6 +30,9 @@ class ColorChannelSwapper:
         self.swap_btn = tk.Button(self.root, text="Swap Channels", command=self.swap_channels, state=tk.DISABLED)
         self.swap_btn.pack(pady=5)
 
+        self.revert_btn = tk.Button(self.root, text="Revert to Original", command=self.revert_image, state=tk.DISABLED)
+        self.revert_btn.pack(pady=5)
+
         self.save_btn = tk.Button(self.root, text="Save Image", command=self.save_image, state=tk.DISABLED)
         self.save_btn.pack(pady=5)
 
@@ -47,6 +51,7 @@ class ColorChannelSwapper:
             self.display_image(self.image)
             self.swap_btn.config(state=tk.NORMAL)
             self.save_btn.config(state=tk.DISABLED)
+            self.revert_btn.config(state=tk.DISABLED)
 
     def display_image(self, img):
         img_resized = img.copy()
@@ -62,7 +67,6 @@ class ColorChannelSwapper:
         if c1 == c2:
             messagebox.showwarning("Warning", "Please select two different channels.")
             return
-        # Disable the swap button if identical channels are selected
         self.swap_btn.config(state=tk.NORMAL if c1 != c2 else tk.DISABLED)
         channel_indices = {'R': 0, 'G': 1, 'B': 2}
         arr = self.image.copy()
@@ -74,12 +78,20 @@ class ColorChannelSwapper:
         self.image = swapped
         self.display_image(self.image)
         self.save_btn.config(state=tk.NORMAL)
+        self.revert_btn.config(state=tk.NORMAL)
 
     # Add a trace to the channel selection to disable the swap button if identical
     def update_swap_btn_state(self, *args):
         c1 = self.channel1.get()
         c2 = self.channel2.get()
         self.swap_btn.config(state=tk.NORMAL if c1 != c2 and self.image else tk.DISABLED)
+
+    def revert_image(self):
+        if self.original_image:
+            self.image = self.original_image.copy()
+            self.display_image(self.image)
+            self.save_btn.config(state=tk.NORMAL)
+            self.revert_btn.config(state=tk.DISABLED)
 
     def save_image(self):
         if not self.image:
